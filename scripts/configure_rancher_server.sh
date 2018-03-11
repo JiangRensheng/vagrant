@@ -24,6 +24,8 @@ else
   protocol="http"
 fi
 
+echo "nameserver 202.96.134.133" > /etc/resolv.conf
+
 ros config set rancher.docker.insecure_registry "['$cache_ip:5000']"
 if [ ! "$network_type" == "airgap" ] ; then
   ros config set rancher.docker.registry_mirror "http://$cache_ip:4000"
@@ -36,7 +38,7 @@ if [ ! "$network_type" == "airgap" ] ; then
 fi
   ros engine switch docker-1.12.6
 system-docker restart docker
-sleep 5
+sleep 15
 
 if [ "$network_type" == "isolated" ] || [ "$network_type" == "airgap" ] ; then
   ros config set rancher.network.dns.nameservers ["'$cache_ip'"]
@@ -69,6 +71,7 @@ else
   rancher_command="rancher/server:$rancher_server_version" 
 fi
 
+sudo docker pull $rancher_command
 echo Installing Rancher Server
 sudo docker run -d --restart=always \
  -p 443:443 \

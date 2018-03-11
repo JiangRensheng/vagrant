@@ -6,8 +6,10 @@ sslenabled=${4:-false}
 ssldns=${5:-server.rancher.vagrant}
 cache_ip=${6:-172.22.101.100}
 
+echo "nameserver 202.96.134.133" > /etc/resolv.conf
+
 agent_ip=`ip addr show eth1 | grep "inet\b" | awk '{print $2}' | cut -d/ -f1`
-ip route add 8.8.8.8 dev eth1 src $agent_ip
+#ip route add 8.8.8.8 dev eth1 src $agent_ip
 
 curl_prefix="appropriate"
 if [ "$sslenabled" == 'true' ]; then
@@ -24,7 +26,7 @@ fi
 #if [ "$orchestrator" == "kubernetes" ] && [ ! "$(ros engine list | grep current | grep docker-1.12.6)" ]; then
   ros engine switch docker-1.12.6
   system-docker restart docker
-  sleep 5
+  sleep 15
 #fi
 
 ros config set rancher.docker.insecure_registry "['$cache_ip:5000']"
@@ -39,7 +41,7 @@ if [ ! "$network_type" == "airgap" ] ; then
 fi
 
 system-docker restart docker
-sleep 5
+sleep 15
 
 if [ "$sslenabled" == 'true' ]; then
 mkdir -p /var/lib/rancher/etc/ssl
@@ -76,6 +78,7 @@ if [ "$sslenabled" == 'true' ]; then
 fi
 
 # Login
+docker pull $curl_prefix/curl
 LOGINRESPONSE=$(docker run \
     --rm \
     $curl_prefix/curl \
